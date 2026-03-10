@@ -27,20 +27,7 @@ class SaleOrder(models.Model):
 
             for fin_move, pick_move in move_and_move.items():
                 fin_move.move_dest_ids = [(6, 0, pick_move.ids)]
-            # fixing issue Reserve function seems not working
-            # https://www.falinwa.com/odoo/helpdesk.ticket/13766
-            so_moves = so.picking_ids.mapped('move_ids_without_package')
-            po_moves = rec.picking_ids.mapped('move_ids_without_package')
-            for so_move in so_moves:
-                matched_po_moves = po_moves.filtered(
-                    lambda m: m.product_id == so_move.product_id
-                )
-                if matched_po_moves:
-                    po_move = matched_po_moves
-                    so_move.write({
-                        'move_orig_ids': [(6,0, matched_po_moves.ids)],
-                        'quantity': po_move.quantity,
-                    })
+
                 
 
     def action_confirm(self):
