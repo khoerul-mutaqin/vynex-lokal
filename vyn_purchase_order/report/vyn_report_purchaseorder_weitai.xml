@@ -1,0 +1,108 @@
+<odoo>
+    <data>
+        <record id="vyn_report_purchaseorder_weitai" model="ir.ui.view">
+            <field name="name">	vyn_report_purchaseorder_weitai</field>
+            <field name="inherit_id" ref="purchase_stock.report_purchaseorder_document"/>
+            <field name="arch" type="xml">
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[2]" position="replace"/>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/thead[1]/tr[1]/th[2]" position="replace"/>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/thead[1]/tr[1]/th[2]" position="replace"/>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[2]" position="replace"/>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[2]" position="attributes">
+                    <attribute name="class">text-right monetary</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[2]/span[1]" position="attributes">
+                    <attribute name="t-options-widget">"float"</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[2]/span[1]" position="attributes">
+                    <attribute name="t-options-precision">2</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[3]/span[1]" position="attributes">
+                    <attribute name="t-options-widget">"float"</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[3]/span[1]" position="attributes">
+                    <attribute name="t-options-precision">2</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/t[4]/t[1]/div[1]/div[1]" position="attributes">
+                    <attribute name="t-options-fields">['address', 'phone', 'name']</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/t[4]/t[1]/div[1]/div[1]" position="attributes">
+                    <attribute name="t-options-fields">['address', 'phone', 'name', 'email']</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/t[4]/t[1]/div[1]/div[1]" position="attributes">
+                    <attribute name="t-options-fields">['address', 'phone', 'name', 'email', 'mobile']</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/t[2]/div[1]" position="attributes">
+                    <attribute name="t-options-fields">['address', 'name', 'phone', 'email']</attribute>
+                </xpath>
+                <xpath expr="/t/t/div/table/thead/tr/th[4]" position="after">
+                    <th>
+                    <span>Subtotal VAT</span>
+                    </th>
+                </xpath>
+                <xpath expr="/t/t/div/table/tbody/t[2]/tr/t[1]/td[4]" position="after">
+                    <td>
+                    <span t-field="line.x_vat_subtotal"/>
+                    </td>
+                </xpath>
+                <xpath expr="/t/t/div/table/tbody/t[2]/t[2]/tr/td" position="attributes">
+                    <attribute name="colspan">100</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[5]/span[1]" position="attributes">
+                    <attribute name="t-field">line.vyn_subtotal_vat</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[5]/span[1]" position="attributes">
+                    <attribute name="t-options-widget">""</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[5]/span[1]" position="attributes">
+                    <attribute name="t-options-widget">"monetary"</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/tbody[1]/t[2]/tr[1]/t[1]/td[5]" position="attributes">
+                    <attribute name="class">text-right</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/thead[1]/tr[1]/th[5]/span[1]" position="attributes">
+                    <attribute name="class">text-right</attribute>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/div[1]/table[1]/thead[1]/tr[1]/th[5]" position="attributes">
+                    <attribute name="class">text-right</attribute>
+                </xpath>
+                <xpath expr="/t/t/div/table/thead/tr/th[1]" position="after">
+                    <th>
+                    <span>Vendor Code</span>
+                    </th>
+                </xpath>
+                <xpath expr="/t/t/div/table/tbody/t[2]/tr/t[1]/td[1]" position="after">
+                    <td>
+                    <t
+                        t-set="trouve" 
+                        t-value="0"
+                    />
+                    <t t-foreach="range(len(line.product_id.variant_seller_ids))" t-as="index">
+                        <t t-if="line.product_id.variant_seller_ids[index].name == o.partner_id and trouve == 0" >
+                            <t
+                            t-set="product_name" 
+                            t-value="line.product_id.variant_seller_ids[index].product_code"
+                            />
+                            <t
+                            t-set="trouve" 
+                            t-value="1"
+                            />
+                            <span t-esc="product_name" />
+                        </t>
+                    </t>
+                    </td>
+                </xpath>
+                    <xpath expr="/t/t/div/div[1]" position="after">
+                    <div class="row">
+                    <div class="col">
+                        <span>Payment term:</span> <span t-field="o.payment_term_id.name"/>
+                    </div>
+                    </div>
+                </xpath>
+                <xpath expr="/t[1]/t[1]/t[2]/div[1]" position="after">
+                    <span t-if="o.partner_id.child_ids" t-field="o.partner_id.child_ids[0].name"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

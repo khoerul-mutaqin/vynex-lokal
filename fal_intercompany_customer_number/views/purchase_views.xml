@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <record id="view_purchase_order_fal_form_intercompany" model="ir.ui.view">
+            <field name="name">view.purchase.order.fal.form.intercompany</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='picking_type_id']" position="after">
+                    <field name="fal_customer_number"/>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='name']" position="after">
+                    <field name="fal_customer_invoice_number"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo> 

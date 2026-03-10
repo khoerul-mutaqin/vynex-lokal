@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_inherit_fal_intercompany_delivery_order" model="ir.ui.view">
+        <field name="name">account.move.form.fal.intercompany.delivery.order</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group/group/div[1]" position="after">
+                <field name="fal_customer_number" string="Customer Number"/>               
+            </xpath>
+        </field>
+    </record>
+</odoo>

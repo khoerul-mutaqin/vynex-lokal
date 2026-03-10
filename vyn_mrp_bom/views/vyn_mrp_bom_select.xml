@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="view_mrp_bom_select_inherit" model="ir.ui.view">
+            <field name="name">vyn.mrp.bom.select.inherit</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='bom_line_ids']" position="after">
+                    <field name="vyn_product_category"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

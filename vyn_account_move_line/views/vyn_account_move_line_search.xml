@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire du produit -->
+        <record id="vyn_account_move_line_search_inherit" model="ir.ui.view">
+            <field name="name">vyn.account.move.line.search.inherit</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_account_move_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='group_by_matching']" position="after">
+                    <filter name="vyn_group_by_MSvOe" string="Product" context="{'group_by': 'product_id'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

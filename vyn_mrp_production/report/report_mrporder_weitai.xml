@@ -1,0 +1,197 @@
+<odoo>
+    <data>
+        <record id="vyn_report_mrporder_weitai" model="ir.ui.view">
+            <field name="name">vyn_report_mrporder_weitai</field>
+            <field name="inherit_id" ref="mrp.report_mrporder"/>
+            <field name="arch" type="xml">
+                <xpath expr="/t/t/t/t/div" position="attributes">
+                    <attribute name="style" separator=" " add="width:100% !important"/>
+                </xpath>
+                <xpath expr="/t/t/t/t/div/div[2]/div" position="replace">
+                    <div style=" width: 100%" class="col-12">
+                    <table style="font-size: 1.17rem; width: 100%">
+                    <tr>
+                        <td class="text-left"   style="width: 33%"><h3><span t-field="o.vyn_customer_order_number"></span></h3></td>
+                        <td class="text-center" style="width: 33%"><h3><span  t-field="o.product_id.vyn_marque"></span></h3></td>
+                        <td class="text-right" style="width: 33%"><h3><span>- ORDRE DE FABRICATION</span></h3></td>
+                    </tr>
+                    </table>
+
+                    <table class="tbl table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                        <th style="width:25%"><span>Numéro de l'OF</span></th>
+                        <th style="width:25%"><span>Date de fin de préparation prévue :</span></th>
+                        <th style="width:25%">Fait par:</th>
+                        <th style="width:25%">Origine:</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <td><span t-field="o.name"/></td>
+                        <td><span t-field="o.date_deadline" t-options-widget="&quot;date&quot;"/></td>
+                        <td>Date:</td>
+                        <td>Date:</td>
+                    </tbody>
+                    </table>
+                    </div>
+                </xpath>
+
+                <xpath expr="/t/t/t/t/div/div[2]/div/table" position="attributes">
+                    <attribute name="style" separator=";" add="width:100%"/>
+                        <attribute name="class" separator=" " add="table-sm"/>
+                </xpath>
+
+                <xpath expr="/t/t/t/t/div/div[2]/div/table/thead" position="attributes">
+                    <attribute name="class" separator=" " add="o_bold text-left"/>
+                </xpath>
+
+                <xpath expr="/t/t/t/t/div/div[2]/div[2]" position="replace">
+                </xpath>
+                <xpath expr="/t/t/t/t/div/div[3]" position="replace">
+                    <div></div>
+                </xpath>
+                <xpath expr="/t/t/t/t/div/div[4]" position="replace">
+                    <div></div>
+                </xpath>
+                <xpath expr="/t/t/t/t/div/div[5]" position="replace">
+                <div>
+                                            <style>
+                                            .tbl{
+                                                font-size: 0.75rem;
+                                                border: 1px solid black;
+                                                border-collapse: collapse;
+                                            }
+                                                .tbl tr th{
+                                                    border: 1px solid black;
+                                                    border-collapse: collapse;
+                                                    padding: 1px;
+                                                }
+                                                .tbl tr td{
+                                                    border: 1px solid black;
+                                                    border-collapse: collapse;
+                                                    padding: 1px;
+                                                }
+                                                #num_cde { align:text-left; text-size:42px;
+                                                margin-right: 250px;
+                                                }
+                                                #titre_cde { align:text-right; text-size:42px;
+                                                margin-left: 250px;
+                                                }
+                                        </style>
+                    <h3>PF</h3>
+                    <table class="table tbl small"  style="border: 1px solid black">
+                    <tr>
+                        <th><strong>Numéro de commande</strong></th>
+                        <th><strong>Référence</strong></th>
+                        <th><strong>Ancien code</strong></th>
+                        <th><strong>Désignation article</strong></th>
+                        <th><strong>Quantité commandée</strong></th>
+                        <th><strong>Type d'emballage</strong></th>
+                        <th><strong>Pcs/unit</strong></th>
+                        <th><strong>Unités/pcb</strong></th>
+                        <th><strong>Pcb/sur-pcb</strong></th>
+                    </tr>
+                    <tr>
+                        <td><span t-field="o.origin"/></td>
+                        <td><span t-field="o.product_id.default_code"/></td>
+                        <td><span t-field="o.product_id.vyn_ancien_code"/></td>
+                        <td><span t-field="o.product_id.name"/></td>
+                        <td class="text-right"><span t-field="o.product_qty"   t-options-widget="&quot;float&quot;" t-options-precision="2" /></td>
+                        <td class="text-right"><span t-field="o.product_id.vyn_packing_type"/></td>
+                        <td class="text-right"><span t-field="o.product_id.vyn_uc_per_unit" t-options-widget="&quot;float&quot;" t-options-precision="2" /></td>
+                        <td class="text-right"><span t-field="o.product_id.vyn_unit_per_inner" t-options-widget="&quot;float&quot;" t-options-precision="2"></span></td>
+                        <td class="text-right"><span t-field="o.vyn_contained_qty_in_pack_1"   t-options-widget="&quot;float&quot;" t-options-precision="2"></span></td>
+                    </tr>
+                    </table>
+                </div>
+                </xpath>
+                <xpath expr="/t/t/t/t/div/table/thead" position="attributes">
+                    <attribute name="style" separator=";" add="width:800px"/>
+                </xpath>
+                <xpath expr="/t/t/t/t/div/table" position="replace">
+                <h1></h1>
+                    <!-- table class="table table-sm" t-if="o.move_raw_ids" -->
+                    <table t-if="o.move_raw_ids" class="tbl table-striped small" style="width:100%">
+                    <t t-set="has_product_barcode" t-value="any(m.product_id.barcode for m in o.move_raw_ids)"/>
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Code interne</th>
+                            <th>Désignation article</th>
+                            <th>Quantité unitaire</th>
+                            <th>Quantité totale</th>
+                            <th>Unité</th>
+                            <th>Unité préparée</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="o.move_raw_ids">
+                            <tr t-foreach="o.move_raw_ids.filtered(lambda m: m.state != 'cancel')" t-as="raw_line">
+                                <td><span t-field="raw_line.product_id.default_code"/></td>
+                                <td><span t-field="raw_line.product_id.name"/></td>
+                                <td><span t-field="raw_line.product_id.vyn_ancien_code"/></td>
+                                <TD class="text-right"><span t-field="raw_line.bom_line_id.product_qty"   t-options-widget="&quot;float&quot;" t-options-precision="2"/></TD>
+                                <TD class="text-right"><span t-field="raw_line.product_uom_qty"   t-options-widget="&quot;float&quot;" t-options-precision="2"/></TD>
+                                <TD><span t-field="raw_line.bom_line_id.product_uom_id.display_name"/></TD>
+                                <TD></TD>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <table>
+                <div class="row">
+                    <div class="col">
+                    </div>
+                </div>
+                </table>
+                <table style="width:100%" class="small">
+                <thead>
+                    <tr>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    <th style="width:12%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>Date fin collecte matière:</td>
+                    <td></td>
+                    <td>Date donné pour emballage:</td>
+                    <td></td>
+                    <td>Date contrôle échantillon</td>
+                    <td></td>
+                    <td>Date début emballage:</td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                    <td>Personne fin collecte matière</td>
+                    <td></td>
+                    <td>Personne donné pour emballage:</td>
+                    <td></td>
+                    <td>Personne pour contrôle échantillon:</td>
+                    <td></td>
+                    <td>Signature chef d'équipe:</td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Personne qui a réceptionné la matière:</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Signature contrôle qualité:</td>
+                    <td></td>
+                    </tr>
+                </tbody>
+                </table>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

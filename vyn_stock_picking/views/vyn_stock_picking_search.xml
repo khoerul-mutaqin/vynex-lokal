@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire du produit -->
+        <record id="vyn_stock_picking_internal_search_inherit" model="ir.ui.view">
+            <field name="name">vyn.stock.picking.search.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='product_id']" position="before">
+                    <field name="vyn_customer_order_number"/>
+                </xpath>
+                <xpath expr="//filter[@name='status']" position="before">
+                    <filter name="vyn_group_by_7QLv6" string="Batch Transfer" context="{'group_by': 'batch_id'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

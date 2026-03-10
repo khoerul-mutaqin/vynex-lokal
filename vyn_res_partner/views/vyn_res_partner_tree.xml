@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire du produit -->
+        <record id="vyn_res_partner_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.res.partner.tree.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='display_name']" position="after">
+                    <field name="partner_gid" optional="show"/>
+                </xpath>
+                <xpath expr="//field[@name='ref']" position="after">
+                    <field name="id" optional="show"/>
+                    <field name="same_vat_partner_id" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

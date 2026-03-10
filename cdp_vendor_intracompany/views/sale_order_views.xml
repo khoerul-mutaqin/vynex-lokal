@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_order_form_inherit_transaction" model="ir.ui.view">
+    <field name="name">sale.order.form.transaction.route</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+        <header position="inside">
+            <button name="action_generate_intra_company" 
+                    type="object" 
+                    string="Generate Intra Company"
+                    invisible="cdp_created_intra_company == True"
+                    class="btn-primary"/>
+            <button name="cdp_update_intra_company" 
+                    type="object" 
+                    string="Update Intra Company"
+                    invisible="cdp_created_intra_company == False"
+                    class="btn-primary"/>
+        </header>
+        <field name="client_order_ref" position="after">
+            <field name="cdp_origin_order"/>
+        </field>
+    </field>
+  </record>
+</odoo>

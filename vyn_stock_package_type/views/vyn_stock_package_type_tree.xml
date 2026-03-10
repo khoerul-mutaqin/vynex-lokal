@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire des lignes de mouvement de stock -->
+        <record id="view_stock_package_type_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.stock.package.type.tree.inherit</field>
+            <field name="model">stock.package.type</field>
+            <field name="inherit_id" ref="stock.stock_package_type_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='packaging_length']" position="after">
+                    <xpath expr="//field[@name='height']" position="move"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

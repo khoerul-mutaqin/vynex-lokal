@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_cdp_field_sync_tree" model="ir.ui.view">
+            <field name="name">cdp.field.sync.tree</field>
+            <field name="model">cdp.fields.sync</field>
+            <field name="arch" type="xml">
+                <list string="Field Sync Rules" editable="bottom">
+                    <field name="cdp_from_model_id"/>
+                    <field name="cdp_from_field_id"/>
+                    <field name="cdp_to_model_id"/>
+                    <field name="cdp_to_field_id"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_cdp_field_sync" model="ir.actions.act_window">
+            <field name="name">Field Sync Rules</field>
+            <field name="res_model">cdp.fields.sync</field>
+            <field name="view_mode">list</field>
+            <field name="help" type="html">
+                <p>
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_cdp_field_sync"
+                  name="Field Sync Rules"
+                  parent="base.next_id_6"
+                  action="action_cdp_field_sync"/>
+    
+    </data>
+</odoo>

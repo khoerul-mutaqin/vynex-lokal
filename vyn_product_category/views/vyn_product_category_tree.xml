@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="vyn_product_category_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.product.category.tree.inherit</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="product.product_category_list_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='display_name']" position="after">
+                    <field name="service_procured_purchase_grouping" optional="show"/>
+                    <field name="procured_purchase_grouping" optional="show"/>
+                    <field name="property_account_expense_categ_id" optional="hide"/>
+                    <field name="property_account_income_categ_id" optional="hide"/>
+                    <field name="property_valuation" optional="show"/>
+                    <field name="property_cost_method" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

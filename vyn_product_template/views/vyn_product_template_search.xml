@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire du produit -->
+        <record id="view_product_template_search_stock_form_inherit" model="ir.ui.view">
+            <field name="name">vyn.product.template.search.stock.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_search_form_view_stock"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='warehouse_id']" position="after">
+                    <field name="vyn_ancien_code"/>
+                    <field name="responsible_id"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

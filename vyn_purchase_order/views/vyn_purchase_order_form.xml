@@ -1,0 +1,39 @@
+<odoo>
+    <data>
+        <record id="vyn_purchase_order_form_inherit" model="ir.ui.view">
+            <field name="name">vyn.purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='purchase_line_title']" position="replace">
+                    <field optional="show" name="vyn_forecast_1" string="Forecast"/>
+                    <field optional="show" name="vyn_moq" string="MOQ"/>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='name']" position="attributes">
+                    <attribute name="string"/>
+                    <attribute name="optional">show</attribute>
+                    <attribute name="widget"/>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='product_qty']" position="attributes">
+                    <attribute name="sum">Sum of Quantity</attribute>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/button[@name='action_product_forecast_report']" position="after">
+                    <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='product_uom']" position="move"/>
+                </xpath>
+                <xpath expr="//field[@name='product_packaging_qty']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='product_packaging_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='price_unit']" position="after">
+                    <field optional="show" name="vyn_subtotal_vat" string="Subtotal VAT"/>
+                    <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='price_subtotal']" position="move"/>
+                </xpath>
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='products']/field[@name='order_line']/list[1]/field[@name='taxes_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

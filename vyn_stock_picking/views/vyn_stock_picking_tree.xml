@@ -1,0 +1,30 @@
+<odoo>
+    <data>
+        <record id="view_stock_picking_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.stock.picking.tree.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.vpicktree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='is_signed']" position="replace"/>
+                <xpath expr="//list[1]/field[@name='name']" position="after">
+                    <field name="vyn_customer_order_number" optional="show"/>
+                    <field optional="hide" name="vyn_product"/>
+                    <field name="vyn_quantity_to_produce" optional="hide"/>
+                    <field name="vyn_related_field_supplier" optional="hide"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="after">
+                    <xpath expr="//field[@name='state']" position="move"/>
+                </xpath>
+                <xpath expr="//field[@name='batch_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

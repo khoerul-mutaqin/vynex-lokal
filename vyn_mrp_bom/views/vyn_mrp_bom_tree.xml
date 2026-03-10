@@ -1,0 +1,19 @@
+<odoo>
+    <data>
+        <record id="view_mrp_bom_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.mrp.bom.tree.inherit</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='code']" position="replace">
+                    <field optional="hide" name="vyn_product_category" string="Product category"/>
+                    <field optional="show" name="vyn_rfrence_interne" string="Référence interne"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date" optional="hide"/>
+                    <field name="write_uid" optional="hide"/>
+                    <field name="create_uid" optional="hide"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

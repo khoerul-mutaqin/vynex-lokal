@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire du produit -->
+        <record id="vyn_stock_quant_search_inherit" model="ir.ui.view">
+            <field name="name">vyn.stock.quant.search.inherit</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.quant_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search[1]/group[1]/separator[2]" position="after">
+                    <filter name="vyn_filter_IZ9uh" string="Storable Product" domain="[[&quot;product_id.type&quot;,&quot;=&quot;,&quot;product&quot;]]"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

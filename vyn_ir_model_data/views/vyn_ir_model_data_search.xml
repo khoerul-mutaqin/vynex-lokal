@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Ajout de champs personnalisés dans la vue formulaire des lignes de mouvement de stock -->
+        <record id="view_ir_model_data_search_inherit" model="ir.ui.view">
+            <field name="name">vyn.ir.model.data.search.inherit</field>
+            <field name="model">ir.model.data</field>
+            <field name="inherit_id" ref="base.view_model_data_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='module']" position="after">
+                    <field name="display_name"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

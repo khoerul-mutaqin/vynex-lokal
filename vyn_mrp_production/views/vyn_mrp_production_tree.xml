@@ -1,0 +1,29 @@
+<odoo>
+    <data>
+        <record id="view_mrp_production_tree_inherit" model="ir.ui.view">
+            <field name="name">vyn.mrp.production.tree.inherit</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[1]/field[@name='name']" position="after">
+                    <field name="vyn_customer_order_number" optional="show"/>
+                </xpath>
+                <xpath expr="//field[@name='components_availability']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='components_availability']" position="after">
+                    <field optional="show" name="vyn_availability_component" string="Availability component"/>
+                </xpath>
+                <xpath expr="//field[@name='production_duration_expected']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='production_real_duration']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
