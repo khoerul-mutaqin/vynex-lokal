@@ -37,22 +37,15 @@ class PurchaseOrder(models.Model):
 
             for fin_move, pick_move in move_and_move.items():
                 fin_move.move_dest_ids = [(6, 0, pick_move.ids)]
-                
-            # fixing issue Reserve function seems not working
-            # https://www.falinwa.com/odoo/helpdesk.ticket/13766
-            so_moves = so.picking_ids.mapped('move_ids_without_package')
-            po_moves = self.picking_ids.mapped('move_ids_without_package')
-            for so_move in so_moves:
-                matched_po_moves = po_moves.filtered(
-                    lambda m: m.product_id == so_move.product_id
-                )
-                if matched_po_moves:
-                    po_move = matched_po_moves
-                    so_move.write({
-                        'move_orig_ids': [(6,0, matched_po_moves.ids)],
-                        'quantity': po_move.quantity,
-                    })
-                    
+
+	    #issue ticket 13766, reserve function not working
+        so_moves = so.picking_ids.mapped('move_ids_without_package')
+        po_moves = self.picking_ids.mapped('move_ids_without_package')
+        for so_move in so_moves:
+            matched_po_moves = po_moves.filtered(lambda m: m.product_id == so_move.product_id)
+            if matched_po_moves:
+                so_move.write({'move_orig_ids':[(6,0,matched_po_moves.ids)]})
+
     def button_confirm(self):
         res = super().button_confirm()
         for po in self:
@@ -66,3 +59,46 @@ class PurchaseOrderLine(models.Model):
     def _create_or_update_picking(self):
         return True
     
+    # @api.model_create_multi
+    # def create(self, vals_list):        
+    #     res = super().create(vals_list)
+    #     self.env['ir.logging'].sudo().create({
+    #             'name': 'create',
+    #             'type': 'server',
+    #             'level': 'INFO',
+    #             'dbname': self.env.cr.dbname,
+    #             'message': str(vals_list),
+    #             'func': "create",
+    #             'path': '',
+    #             'line': '1',
+    #         })
+    #     return res
+
+    # def write(self, values):
+    #     res = super().write(values)
+    #     message = ""
+    #     if 'move_dest_ids' in values and values['move_dest_ids']:
+    #         for command in values['move_dest_ids']:
+                
+    #             if command[0] == 4:
+    #                 move_id = command[1]
+    #                 message += "test"
+    #                 move = self.env['stock.move'].browse(move_id)
+    #                 if move.exists():
+    #                     message += str(move)
+    #                     values['product_qty'] = move.product_uom_qty
+    #     self.env['ir.logging'].sudo().create({
+    #             'name': 'write',
+    #             'type': 'server',
+    #             'level': 'INFO',
+    #             'dbname': self.env.cr.dbname,
+    #             'message': str(values) + message,
+    #             'func': "write",
+    #             'path': '',
+    #             'line': '1',
+    #         })
+    #     # raise EnvironmentError
+    #     return res
+    
+    
+
