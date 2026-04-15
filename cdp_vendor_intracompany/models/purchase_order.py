@@ -39,12 +39,21 @@ class PurchaseOrder(models.Model):
                 fin_move.move_dest_ids = [(6, 0, pick_move.ids)]
 
 	    #issue ticket 13766, reserve function not working
-        so_moves = so.picking_ids.mapped('move_ids_without_package')
+        # so_moves = so.picking_ids.mapped('move_ids_without_package')
         po_moves = self.picking_ids.mapped('move_ids_without_package')
-        for so_move in so_moves:
-            matched_po_moves = po_moves.filtered(lambda m: m.product_id == so_move.product_id)
-            if matched_po_moves:
-                so_move.write({'move_orig_ids':[(6,0,matched_po_moves.ids)]})
+        for po in po_moves:
+            remaining_po_qty = po.product_uom_qty
+            so_moves = so.picking_ids.mapped('move_ids_without_package').filtered(
+                lambda m: m.sale_line_id and m.product_id == po.product_id
+            )
+            for so_move in so_moves:
+                if remaining_po_qty <= 0:
+                    break
+                qty_to_assign = min(so_move.product_uom_qty, remaining_po_qty)
+                so_move['move_orig_ids'] = [(4, po.id)]
+                po['move_dest_ids'] = [(4, so_move.id)]
+                remaining_po_qty -= qty_to_assign
+
 
     def button_confirm(self):
         res = super().button_confirm()
