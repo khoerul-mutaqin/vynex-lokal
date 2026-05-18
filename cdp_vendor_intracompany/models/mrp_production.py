@@ -9,6 +9,50 @@ class MRP(models.Model):
 
     cdp_origin_order = fields.Char("Origin Order", copy=False)
 
+    def _cdp_update_move_qty(self):
+        for production in self:
+
+            so = self.env["sale.order"].sudo().search([
+                ("mrp_production_ids", "in", production.ids),
+                ("name", "=", production.origin)
+            ], limit=1)
+
+            if not so:
+                continue
+
+            active_pickings = so.picking_ids.filtered(
+                lambda p: p.state not in ('done', 'cancel')
+            )
+
+            finished_moves = so.mrp_production_ids.mapped('move_finished_ids')
+
+            for finished_move in finished_moves:
+
+                for picking in active_pickings:
+
+                    matching_moves = picking.move_ids_without_package.filtered(
+                        lambda m:
+                            m.product_id == finished_move.product_id
+                            and m.state not in ('done', 'cancel')
+                    )
+
+                    for move in matching_moves:
+
+                        move.write({
+                            'quantity': finished_move.production_id.qty_producing
+                        })
+
+                        
+                    picking.action_assign()
+
+
+
+    def write(self, vals):
+        res = super(MRP, self).write(vals)
+        if 'state' in vals and vals.get('state') == 'done':
+            self._cdp_update_move_qty()
+        return res
+
     def action_confirm(self):
         res = super(MRP, self).action_confirm()
         for mrp in self:

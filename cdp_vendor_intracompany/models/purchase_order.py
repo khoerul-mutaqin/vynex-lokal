@@ -54,6 +54,9 @@ class PurchaseOrder(models.Model):
                 po['move_dest_ids'] = [(4, so_move.id)]
                 remaining_po_qty -= qty_to_assign
 
+        for picking in self.picking_ids:
+            picking.action_assign()
+
 
     def button_confirm(self):
         res = super().button_confirm()
