@@ -1,8 +1,43 @@
 from odoo import models
 
+class StockMove(models.Model):
+    _inherit = "stock.move"
+
+    # https://www.falinwa.com/odoo/helpdesk.ticket/15533
+    def _action_assign(self):
+        res = super()._action_assign()
+        for move in self.filtered(
+            lambda m: m.picking_id.sale_id and m.picking_id.sale_id.cdp_origin_order
+        ):
+            done_moves = move.move_orig_ids.filtered(lambda m: m.picking_id and m.picking_id.state == 'done')
+            if not done_moves:
+                continue
+            total_qty = sum(done_moves.mapped("quantity"))
+            if move.quantity != total_qty:
+                move.quantity = total_qty
+        return res
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
+
+    # https://www.falinwa.com/odoo/helpdesk.ticket/15533
+    def _cdp_update_move_dest_ids(self):
+        for rec in self:
+            for move in rec.move_ids_without_package:
+                done_moves = move.move_orig_ids.filtered(lambda m: m.picking_id and m.picking_id.state == 'done')
+                if not done_moves:
+                    continue
+                total_qty = sum(done_moves.mapped("quantity"))
+                if total_qty != move.quantity:
+                    move.quantity = total_qty
+
+    def action_assign(self):
+        res = super().action_assign()
+        for picking in self.filtered(
+            lambda p: p.sale_id and p.sale_id.cdp_origin_order
+        ):
+            picking._cdp_update_move_dest_ids()
+        return res
 
     def button_validate(self):
         res = super(StockPicking, self).button_validate()
@@ -37,12 +72,16 @@ class StockPicking(models.Model):
                             fields_sync.fal_run_sync_record(
                                 "stock.move", "stock.move", current_move, move
                             )
-                            
+
                 for do in all_do:
                     if picking.state == "done":
-                        do.with_context(skip_sanity_check=True).button_validate()        
+                        do.with_context(skip_sanity_check=True).button_validate()
 
-                    moves = do.mapped('backorder_ids').filtered(lambda x: x.state != 'done').mapped('move_ids_without_package')
+                    moves = (
+                        do.mapped("backorder_ids")
+                        .filtered(lambda x: x.state != "done")
+                        .mapped("move_ids_without_package")
+                    )
                     for move in moves:
                         move.move_line_ids.unlink()
         return res
