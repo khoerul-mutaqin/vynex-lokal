@@ -1,5 +1,6 @@
 from odoo import models
 
+
 class StockMove(models.Model):
     _inherit = "stock.move"
 
@@ -9,13 +10,20 @@ class StockMove(models.Model):
         for move in self.filtered(
             lambda m: m.picking_id.sale_id and m.picking_id.sale_id.cdp_origin_order
         ):
-            done_moves = move.move_orig_ids.filtered(lambda m: m.picking_id and m.picking_id.state == 'done')
-            if not done_moves:
-                continue
-            total_qty = sum(done_moves.mapped("quantity"))
+            productions = move.move_orig_ids.mapped("production_id")
+            if move.picking_id.sale_id and productions:
+                total_qty = sum(productions.mapped("qty_producing"))
+            else:
+                done_moves = move.move_orig_ids.filtered(
+                    lambda m: m.picking_id and m.picking_id.state == "done"
+                )
+                if not done_moves:
+                    continue
+                total_qty = sum(done_moves.mapped("quantity"))
             if move.quantity != total_qty:
                 move.quantity = total_qty
         return res
+
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
@@ -24,7 +32,9 @@ class StockPicking(models.Model):
     def _cdp_update_move_dest_ids(self):
         for rec in self:
             for move in rec.move_ids_without_package:
-                done_moves = move.move_orig_ids.filtered(lambda m: m.picking_id and m.picking_id.state == 'done')
+                done_moves = move.move_orig_ids.filtered(
+                    lambda m: m.picking_id and m.picking_id.state == "done"
+                )
                 if not done_moves:
                     continue
                 total_qty = sum(done_moves.mapped("quantity"))

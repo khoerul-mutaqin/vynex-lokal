@@ -20,37 +20,49 @@ class MRP(models.Model):
             if not so:
                 continue
 
-            active_pickings = so.picking_ids.filtered(
-                lambda p: p.state not in ('done', 'cancel')
+            finished_moves = production.move_finished_ids.filtered(
+                lambda m: m.state != 'cancel'
             )
-
-            finished_moves = so.mrp_production_ids.mapped('move_finished_ids')
+            if not finished_moves:
+                continue
+            pickings = so.picking_ids.filtered(
+                lambda p: p.state not in ('done', 'cancel')
+            ).sorted(key=lambda p: p.create_date)
 
             for finished_move in finished_moves:
 
-                for picking in active_pickings:
+                product = finished_move.product_id
+                productions = so.mrp_production_ids.filtered(
+                    lambda p:
+                        p.product_id == product
+                        and p.state == 'done'
+                )
+                receipt_qty = sum(productions.mapped('qty_producing'))
+                remaining_qty = receipt_qty
+                
+                for picking in pickings:
 
-                    matching_moves = picking.move_ids_without_package.filtered(
+                    moves = picking.move_ids_without_package.filtered(
                         lambda m:
-                            m.product_id == finished_move.product_id
+                            m.product_id == product
                             and m.state not in ('done', 'cancel')
                     )
 
-                    for move in matching_moves:
-
+                    for move in moves:
                         move.write({
-                            'quantity': finished_move.production_id.qty_producing
+                            'quantity': remaining_qty,
                         })
-
                         
                     picking.action_assign()
 
-
-
+                    if remaining_qty <= 0:
+                        break
+                
     def write(self, vals):
-        res = super(MRP, self).write(vals)
-        if 'state' in vals and vals.get('state') == 'done':
-            self._cdp_update_move_qty()
+        res = super().write(vals)
+        for rec in self:
+            if rec.state == 'done':
+                rec._cdp_update_move_qty()
         return res
 
     def action_confirm(self):
