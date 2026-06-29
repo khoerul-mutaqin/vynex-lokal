@@ -54,14 +54,20 @@ class PurchaseOrder(models.Model):
                 po['move_dest_ids'] = [(4, so_move.id)]
                 remaining_po_qty -= qty_to_assign
 
-        for picking in self.picking_ids:
-            picking.action_assign()
-
 
     def button_confirm(self):
         res = super().button_confirm()
         for po in self:
             po._cdp_update_move_dest_ids(po.fal_all_recorded_sale)
+        return res
+    
+
+    def button_cancel(self):
+        res = super().button_cancel()
+        pickings = self.picking_ids.filtered(lambda p: p.state not in ('done', 'cancel'))
+        pickings.action_cancel()
+        moves = pickings.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
+        moves._action_cancel()
         return res
 
 
