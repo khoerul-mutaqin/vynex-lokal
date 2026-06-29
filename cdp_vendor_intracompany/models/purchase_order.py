@@ -62,13 +62,6 @@ class PurchaseOrder(models.Model):
         return res
     
 
-    def button_cancel(self):
-        res = super().button_cancel()
-        pickings = self.picking_ids.filtered(lambda p: p.state not in ('done', 'cancel'))
-        pickings.action_cancel()
-        moves = pickings.move_ids.filtered(lambda m: m.state not in ('done', 'cancel'))
-        moves._action_cancel()
-        return res
 
 
 class PurchaseOrderLine(models.Model):
