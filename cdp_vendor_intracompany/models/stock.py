@@ -4,50 +4,9 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    # https://www.falinwa.com/odoo/helpdesk.ticket/15533
-    def _action_assign(self):
-        res = super()._action_assign()
-        for move in self.filtered(
-            lambda m: m.picking_id.sale_id and m.picking_id.sale_id.cdp_origin_order
-        ):
-            productions = move.move_orig_ids.mapped("production_id")
-            if move.picking_id.sale_id and productions:
-                total_qty = sum(productions.mapped("qty_producing"))
-            else:
-                done_moves = move.move_orig_ids.filtered(
-                    lambda m: m.picking_id and m.picking_id.state == "done"
-                )
-                if not done_moves:
-                    continue
-                total_qty = sum(done_moves.mapped("quantity"))
-            if move.quantity != total_qty:
-                move.quantity = total_qty
-        return res
-
-
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    # https://www.falinwa.com/odoo/helpdesk.ticket/15533
-    def _cdp_update_move_dest_ids(self):
-        for rec in self:
-            for move in rec.move_ids_without_package:
-                done_moves = move.move_orig_ids.filtered(
-                    lambda m: m.picking_id and m.picking_id.state == "done"
-                )
-                if not done_moves:
-                    continue
-                total_qty = sum(done_moves.mapped("quantity"))
-                if total_qty != move.quantity:
-                    move.quantity = total_qty
-
-    def action_assign(self):
-        res = super().action_assign()
-        for picking in self.filtered(
-            lambda p: p.sale_id and p.sale_id.cdp_origin_order
-        ):
-            picking._cdp_update_move_dest_ids()
-        return res
 
     def button_validate(self):
         res = super(StockPicking, self).button_validate()

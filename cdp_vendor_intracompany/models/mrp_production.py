@@ -9,61 +9,54 @@ class MRP(models.Model):
 
     cdp_origin_order = fields.Char("Origin Order", copy=False)
 
-    def _cdp_update_move_qty(self):
-        for production in self:
-
-            so = self.env["sale.order"].sudo().search([
-                ("mrp_production_ids", "in", production.ids),
-                ("name", "=", production.origin)
-            ], limit=1)
-
-            if not so:
-                continue
-
-            finished_moves = production.move_finished_ids.filtered(
-                lambda m: m.state != 'cancel'
-            )
-            if not finished_moves:
-                continue
-            pickings = so.picking_ids.filtered(
-                lambda p: p.state not in ('done', 'cancel')
-            ).sorted(key=lambda p: p.create_date)
-
-            for finished_move in finished_moves:
-
-                product = finished_move.product_id
-                productions = so.mrp_production_ids.filtered(
-                    lambda p:
-                        p.product_id == product
-                        and p.state == 'done'
-                )
-                receipt_qty = sum(productions.mapped('qty_producing'))
-                remaining_qty = receipt_qty
-                
-                for picking in pickings:
-
-                    moves = picking.move_ids_without_package.filtered(
-                        lambda m:
-                            m.product_id == product
-                            and m.state not in ('done', 'cancel')
-                    )
-
-                    for move in moves:
-                        move.write({
-                            'quantity': remaining_qty,
-                        })
-                        
-                    picking.action_assign()
-
-                    if remaining_qty <= 0:
-                        break
-                
     def write(self, vals):
         res = super().write(vals)
-        for rec in self:
-            if rec.state == 'done':
-                rec._cdp_update_move_qty()
+
+        if "qty_producing" in vals:
+            for production in self:
+                if production.qty_producing > production.product_qty:
+                    production._cdp_update_move_qty()
         return res
+
+    def _cdp_update_move_qty(self):
+        for production in self:
+            backorders = production.procurement_group_id.mrp_production_ids
+            qty = sum(backorders.mapped("qty_producing"))            
+            # Update MO Qty
+            production.product_uom_qty = qty
+
+            # Finished Move
+            finished_moves = production.move_finished_ids.filtered(
+                lambda m: m.product_id == production.product_id
+            )
+
+            if not finished_moves:
+                continue
+
+            if production.state == "done":
+                finished_moves.write({
+                    "quantity": qty,
+                })
+            else:
+                finished_moves.write({
+                    "product_uom_qty": qty,
+                })
+
+            # Finished Move Lines
+            for ml in production.finished_move_line_ids.filtered(
+                lambda ml: ml.product_id == production.product_id
+            ):
+                ml.quantity = qty
+
+            # Delivery Move
+            delivery_moves = finished_moves.mapped("move_dest_ids").filtered(
+                lambda m: m.state not in ("done", "cancel")
+            )
+
+            for move in delivery_moves:
+                move.product_uom_qty = qty
+                for ml in move.move_line_ids:
+                    ml.quantity = qty
 
     def action_confirm(self):
         res = super(MRP, self).action_confirm()
