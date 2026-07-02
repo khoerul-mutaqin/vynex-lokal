@@ -1,10 +1,24 @@
 from odoo import models
 from odoo.exceptions import UserError
-
-
+from odoo.tools.float_utils import float_compare, float_round
+import traceback
 class StockMove(models.Model):
     _inherit = "stock.move"
 
+    # handle single create
+    def update_get_qty(self):
+        for current_move in self:
+            orig_move = current_move.move_orig_ids.filtered(
+                lambda ml: ml.state == 'done'
+            )
+            quantity = sum(order.quantity for order in orig_move)
+            return quantity
+
+    def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
+        quantity = self.update_get_qty() or quantity
+        result = super()._prepare_move_line_vals(quantity=quantity,reserved_quant=reserved_quant)
+        return result
+    
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
@@ -17,7 +31,6 @@ class StockPicking(models.Model):
             stock_move_ids = all_do.group_id.stock_move_ids 
             for current_move in all_do.move_ids_without_package:
                 for move in stock_move_ids:
-                    raise UserError(f"product {move.product_id} - curr demand :{current_move.product_uom_qty}  curr qty :{current_move.quantity} => state: {move.state} demand: {move.product_uom_qty} qty: {move.quantity}")                    
                     if current_move.product_id == move.product_id and current_move.quantity > move.product_uom_qty and move.state != 'done':
                         move.write({
                             "product_uom_qty": current_move.quantity,
