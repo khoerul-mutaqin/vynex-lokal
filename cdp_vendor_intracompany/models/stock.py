@@ -4,18 +4,36 @@ from odoo.tools.float_utils import float_compare, float_round
 import traceback
 class StockMove(models.Model):
     _inherit = "stock.move"
-
+    
+    def _action_assign(self, force_qty=False):
+        res = super(StockMove, self)._action_assign(force_qty=force_qty)      
+        for rec in self.filtered(lambda m: m.move_dest_ids):
+            qty = rec.update_get_qty(rec.quantity)
+            if qty != rec.quantity and rec.quantity != 0:
+                rec['quantity'] = qty
+        return res
+    
     # handle single create
-    def update_get_qty(self):
-        for current_move in self:
-            orig_move = current_move.move_orig_ids.filtered(
-                lambda ml: ml.state == 'done'
-            )
-            quantity = sum(order.quantity for order in orig_move)
-            return quantity
+    def update_get_qty(self, quantity=None):
+        all_do = self.move_orig_ids.filtered(lambda m: m.state == "done")
+        total_qty = sum(all_do.move_line_ids.mapped("quantity"))
+        total_reserved = 0
+        picking = self.picking_id.backorder_id
 
+        while picking:
+            total_reserved += sum(
+                picking.move_ids.filtered(
+                    lambda m: m.product_id == self.product_id and m.state == "done"
+                ).move_line_ids.mapped("quantity")
+            )
+            picking = picking.backorder_id
+
+        available_qty = total_qty - total_reserved
+
+        return available_qty if quantity != available_qty else quantity
+    
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
-        quantity = self.update_get_qty() or quantity
+        quantity = self.update_get_qty(quantity=quantity) or quantity
         result = super()._prepare_move_line_vals(quantity=quantity,reserved_quant=reserved_quant)
         return result
     

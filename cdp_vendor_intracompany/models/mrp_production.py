@@ -20,11 +20,8 @@ class MRP(models.Model):
 
     def _cdp_update_move_qty(self):
         for production in self:
-            backorders = production.procurement_group_id.mrp_production_ids
-            qty = sum(backorders.mapped("qty_producing"))            
+            qty = production.qty_producing  
             # Update MO Qty
-            production.product_uom_qty = qty
-
             # Finished Move
             finished_moves = production.move_finished_ids.filtered(
                 lambda m: m.product_id == production.product_id
@@ -37,11 +34,6 @@ class MRP(models.Model):
                 finished_moves.write({
                     "quantity": qty,
                 })
-            else:
-                finished_moves.write({
-                    "product_uom_qty": qty,
-                })
-
             # Finished Move Lines
             for ml in production.finished_move_line_ids.filtered(
                 lambda ml: ml.product_id == production.product_id
