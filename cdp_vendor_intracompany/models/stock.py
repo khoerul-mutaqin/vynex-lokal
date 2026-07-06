@@ -5,32 +5,32 @@ import traceback
 class StockMove(models.Model):
     _inherit = "stock.move"
     
-    def _action_assign(self, force_qty=False):
-        res = super(StockMove, self)._action_assign(force_qty=force_qty)      
-        for rec in self.filtered(lambda m: m.move_dest_ids):
-            qty = rec.update_get_qty(rec.quantity)
-            if qty != rec.quantity and rec.quantity != 0:
-                rec['quantity'] = qty
-        return res
+    # def _action_assign(self, force_qty=False):
+    #     res = super(StockMove, self)._action_assign(force_qty=force_qty)      
+    #     for rec in self.filtered(lambda m: m.move_dest_ids):
+    #         qty = rec.update_get_qty(rec.quantity)
+    #         if qty != rec.quantity and rec.quantity != 0:
+    #             rec['quantity'] = qty
+    #     return res
     
-    # handle single create
-    def update_get_qty(self, quantity=None):
-        all_do = self.move_orig_ids.filtered(lambda m: m.state == "done")
-        total_qty = sum(all_do.move_line_ids.mapped("quantity"))
-        total_reserved = 0
-        picking = self.picking_id.backorder_id
+    # # handle single create
+    # def update_get_qty(self, quantity=None):
+    #     all_do = self.move_orig_ids.filtered(lambda m: m.state == "done")
+    #     total_qty = sum(all_do.move_line_ids.mapped("quantity"))
+    #     total_reserved = 0
+    #     picking = self.picking_id.backorder_id
 
-        while picking:
-            total_reserved += sum(
-                picking.move_ids.filtered(
-                    lambda m: m.product_id == self.product_id and m.state == "done"
-                ).move_line_ids.mapped("quantity")
-            )
-            picking = picking.backorder_id
+    #     while picking:
+    #         total_reserved += sum(
+    #             picking.move_ids.filtered(
+    #                 lambda m: m.product_id == self.product_id and m.state == "done"
+    #             ).move_line_ids.mapped("quantity")
+    #         )
+    #         picking = picking.backorder_id
 
-        available_qty = total_qty - total_reserved
+    #     available_qty = total_qty - total_reserved
 
-        return available_qty if quantity != available_qty else quantity
+    #     return available_qty if quantity != available_qty else quantity
     
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         quantity = self.update_get_qty(quantity=quantity) or quantity
@@ -82,18 +82,19 @@ class StockPicking(models.Model):
                     and x.picking_type_id.code != "outgoing"
                 ) + intra_po.mapped("picking_ids").filtered(
                     lambda x: x.state not in ["done", "cancel"]
+                    and x.picking_type_id.code != "incoming"
                 )
                 all_moves = all_do.mapped("move_ids_without_package")
-                # for current_move in self.move_ids_without_package:
-                #     for move in all_moves:
-                #         if current_move.product_id == move.product_id:
-                #             fields_sync.fal_run_sync_record(
-                #                 "stock.move", "stock.move", current_move, move
-                #             )
+                for current_move in self.move_ids_without_package:
+                    for move in all_moves:
+                        if current_move.product_id == move.product_id:
+                            fields_sync.fal_run_sync_record(
+                                "stock.move", "stock.move", current_move, move
+                            )
 
                 for do in all_do:
-                    # if picking.state == "done":
-                        # do.with_context(skip_sanity_check=True).button_validate()
+                    if picking.state == "done":
+                        do.with_context(skip_sanity_check=True).button_validate()
 
                     moves = (
                         do.mapped("backorder_ids")

@@ -46,7 +46,6 @@ class MRP(models.Model):
             )
 
             for move in delivery_moves:
-                move.product_uom_qty = qty
                 for ml in move.move_line_ids:
                     ml.quantity = qty
 
