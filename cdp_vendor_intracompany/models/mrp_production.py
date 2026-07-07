@@ -12,7 +12,7 @@ class MRP(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        if "qty_producing" in vals:
+        if "state" in vals:
             for production in self:
                 if production.qty_producing > production.product_qty:
                     production._cdp_update_move_qty()
