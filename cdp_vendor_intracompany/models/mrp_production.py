@@ -4,50 +4,41 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class MRP(models.Model):
-    _inherit = 'mrp.production'
+    _inherit = "mrp.production"
 
     cdp_origin_order = fields.Char("Origin Order", copy=False)
 
-    def write(self, vals):
-        res = super().write(vals)
+    def button_mark_done(self):
+        res = super(MRP, self).button_mark_done()
+        # sync When produce quantity more than original quantity
+        for mrp in self:
+            if mrp.move_finished_ids and mrp.origin:
+                fields_sync = self.env["cdp.fields.sync"].sudo()
+                sale_order = self.env["sale.order"].sudo()
+                intra_so = sale_order.sudo().search(
+                    [
+                        ("name", "=", mrp.origin),
+                        ("state", "=", "sale"),
+                    ]
+                )
+                if intra_so:
+                    all_do = intra_so.mapped("picking_ids").filtered(
+                        lambda x: (
+                            x.state not in ["done", "cancel"]
+                            and x.picking_type_id.code == "outgoing"
+                        )
+                    )
+                    all_moves = all_do.mapped("move_ids_without_package")
+                    for current_move in self.move_finished_ids:
+                        for move in all_moves:
+                            if current_move.product_id == move.product_id:
+                                fields_sync.fal_run_sync_record(
+                                    "stock.move", "stock.move", current_move, move
+                                )
 
-        if "state" in vals:
-            for production in self:
-                if production.qty_producing > production.product_qty:
-                    production._cdp_update_move_qty()
         return res
-
-    def _cdp_update_move_qty(self):
-        for production in self:
-            qty = production.qty_producing  
-            # Update MO Qty
-            # Finished Move
-            finished_moves = production.move_finished_ids.filtered(
-                lambda m: m.product_id == production.product_id
-            )
-
-            if not finished_moves:
-                continue
-
-            if production.state == "done":
-                finished_moves.write({
-                    "quantity": qty,
-                })
-            # Finished Move Lines
-            for ml in production.finished_move_line_ids.filtered(
-                lambda ml: ml.product_id == production.product_id
-            ):
-                ml.quantity = qty
-
-            # Delivery Move
-            delivery_moves = finished_moves.mapped("move_dest_ids").filtered(
-                lambda m: m.state not in ("done", "cancel")
-            )
-
-            for move in delivery_moves:
-                for ml in move.move_line_ids:
-                    ml.quantity = qty
 
     def action_confirm(self):
         res = super(MRP, self).action_confirm()
@@ -56,12 +47,20 @@ class MRP(models.Model):
                 routes = move.product_id.route_ids.ids
                 if any(r in [1, 7] for r in routes):
                     move._run_procurement()
-                    try:          
-                        _logger.info("Procurement launched for %s", move.product_id.display_name)
+                    try:
+                        _logger.info(
+                            "Procurement launched for %s", move.product_id.display_name
+                        )
                     except Exception as e:
-                        _logger.info("Procurement failed for %s: %s", move.product_id.display_name, e)
-        #write PO quantity 
-        po_lines = self.env["purchase.order.line"].search([("state", "=", "draft"), ("move_dest_ids", "in", mrp.move_raw_ids.ids)])
+                        _logger.info(
+                            "Procurement failed for %s: %s",
+                            move.product_id.display_name,
+                            e,
+                        )
+        # write PO quantity
+        po_lines = self.env["purchase.order.line"].search(
+            [("state", "=", "draft"), ("move_dest_ids", "in", mrp.move_raw_ids.ids)]
+        )
         for line in po_lines:
             qty_pc = sum(
                 line.move_dest_ids.mapped(
@@ -77,6 +76,5 @@ class MRP(models.Model):
                 to_unit=line.product_uom,
             )
 
-            line.write({'product_qty': qty_po})
+            line.write({"product_qty": qty_po})
         return res
-        
